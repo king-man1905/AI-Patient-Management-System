@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - AI Patient Management System</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h1>👤 Create Account</h1>
+
+            <input
+                type="text"
+                id="username"
+                placeholder="Username"
+            >
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Email"
+            >
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Password"
+            >
+
+            <label
+                style="
+                display:block;
+                margin-bottom:15px;
+                color:white;
+                "
+            >
+                <input
+                    type="checkbox"
+                    id="show-password"
+                >
+                Show Password
+            </label>
+
+            <button id="register-btn">
+                Register
+            </button>
+
+            <h3
+                id="message"
+                style="
+                text-align:center;
+                margin-top:15px;
+                "
+            ></h3>
+
+            <p
+                style="
+                text-align:center;
+                margin-top:20px;
+                color:white;
+                "
+            >
+                Already have an account?
+
+                <a
+                    href="/login"
+                    style="
+                    color:#38bdf8;
+                    text-decoration:none;
+                    "
+                >
+                    Login Here
+                </a>
+            </p>
+
+        </div>
+
+    </div>
+
+<script>
+
+// Already Logged In
+if (localStorage.getItem("token")) {
+    window.location.href = "/";
+}
+
+// Show Password
+document
+.getElementById(
+    "show-password"
+)
+.addEventListener(
+    "change",
+    function() {
+
+        const passwordInput =
+            document.getElementById(
+                "password"
+            );
+
+        passwordInput.type =
+            this.checked
+            ? "text"
+            : "password";
+    }
+);
+
+// Register
+document
+.getElementById(
+    "register-btn"
+)
+.addEventListener(
+    "click",
+    async () => {
+
+        const button =
+            document.getElementById(
+                "register-btn"
+            );
+
+        const username =
+            document.getElementById(
+                "username"
+            ).value.trim();
+
+        const email =
+            document.getElementById(
+                "email"
+            ).value.trim();
+
+        const password =
+            document.getElementById(
+                "password"
+            ).value;
+
+        const message =
+            document.getElementById(
+                "message"
+            );
+
+        if (
+            !username ||
+            !email ||
+            !password
+        ) {
+
+            message.style.color =
+                "#ef4444";
+
+            message.innerText =
+                "Please fill all fields";
+
+            return;
+        }
+
+        button.disabled = true;
+        button.innerText =
+            "Creating Account...";
+
+        const data = {
+            username: username,
+            email: email,
+            password: password
+        };
+
+        try {
+
+            const response =
+                await fetch(
+                    "/users/register",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify(
+                            data
+                        )
+                    }
+                );
+
+            const result =
+                await response.json();
+
+            if (!response.ok) {
+
+                message.style.color =
+                    "#ef4444";
+
+                message.innerText =
+                    result.detail ||
+                    "Registration Failed";
+
+                return;
+            }
+
+            message.style.color =
+                "#4ade80";
+
+            message.innerText =
+                "Registration Successful";
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "/login";
+
+            }, 1500);
+
+        }
+
+        catch(error) {
+
+            console.log(error);
+
+            message.style.color =
+                "#ef4444";
+
+            message.innerText =
+                "Server Error";
+        }
+
+        finally {
+
+            button.disabled = false;
+
+            button.innerText =
+                "Register";
+        }
+
+    }
+);
+
+// Enter Key Support
+document.addEventListener(
+    "keypress",
+    (e) => {
+
+        if (
+            e.key === "Enter"
+        ) {
+
+            document
+            .getElementById(
+                "register-btn"
+            )
+            .click();
+        }
+    }
+);
+
+</script>
+
+</body>
+</html>

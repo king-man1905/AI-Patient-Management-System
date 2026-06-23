@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI Patient Management System</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h1>🔐 Login</h1>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Email"
+            >
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Password"
+            >
+
+            <label
+                style="
+                display:block;
+                margin-bottom:15px;
+                color:white;
+                "
+            >
+                <input
+                    type="checkbox"
+                    id="show-password"
+                >
+                Show Password
+            </label>
+
+            <button id="login-btn">
+                Login
+            </button>
+
+            <h3
+                id="message"
+                style="
+                text-align:center;
+                margin-top:15px;
+                "
+            ></h3>
+
+            <p
+                style="
+                text-align:center;
+                margin-top:20px;
+                color:white;
+                "
+            >
+                Don't have an account?
+
+                <a
+                    href="/register"
+                    style="
+                    color:#38bdf8;
+                    text-decoration:none;
+                    "
+                >
+                    Register Here
+                </a>
+            </p>
+
+        </div>
+
+    </div>
+
+<script>
+
+// Already Logged In
+if (localStorage.getItem("token")) {
+    window.location.href = "/";
+}
+
+// Show Password
+document
+.getElementById(
+    "show-password"
+)
+.addEventListener(
+    "change",
+    function() {
+
+        const passwordInput =
+            document.getElementById(
+                "password"
+            );
+
+        passwordInput.type =
+            this.checked
+            ? "text"
+            : "password";
+    }
+);
+
+// Login
+document
+.getElementById(
+    "login-btn"
+)
+.addEventListener(
+    "click",
+    async () => {
+
+        const button =
+            document.getElementById(
+                "login-btn"
+            );
+
+        const email =
+            document.getElementById(
+                "email"
+            ).value.trim();
+
+        const password =
+            document.getElementById(
+                "password"
+            ).value;
+
+        const message =
+            document.getElementById(
+                "message"
+            );
+
+        if (
+            !email ||
+            !password
+        ) {
+
+            message.style.color =
+                "#ef4444";
+
+            message.innerText =
+                "Please fill all fields";
+
+            return;
+        }
+
+        button.disabled = true;
+        button.innerText =
+            "Logging In...";
+
+        const formData =
+            new URLSearchParams();
+
+        formData.append(
+            "username",
+            email
+        );
+
+        formData.append(
+            "password",
+            password
+        );
+
+        try {
+
+            const response =
+                await fetch(
+                    "/users/login",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                            "application/x-www-form-urlencoded"
+                        },
+
+                        body: formData
+                    }
+                );
+
+            const result =
+                await response.json();
+
+            if (!response.ok) {
+
+                message.style.color =
+                    "#ef4444";
+
+                message.innerText =
+                    result.detail ||
+                    "Login Failed";
+
+                return;
+            }
+
+            localStorage.setItem(
+                "token",
+                result.access_token
+            );
+
+            localStorage.setItem(
+                "username",
+                result.username
+            );
+
+            localStorage.setItem(
+                "email",
+                result.email
+            );
+
+            message.style.color =
+                "#4ade80";
+
+            message.innerText =
+                "Login Successful";
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "/";
+
+            }, 1000);
+
+        }
+
+        catch(error) {
+
+            console.log(error);
+
+            message.style.color =
+                "#ef4444";
+
+            message.innerText =
+                "Server Error";
+
+        }
+
+        finally {
+
+            button.disabled = false;
+
+            button.innerText =
+                "Login";
+        }
+
+    }
+);
+
+// Enter Key Support
+document.addEventListener(
+    "keypress",
+    (e) => {
+
+        if (
+            e.key === "Enter"
+        ) {
+
+            document
+            .getElementById(
+                "login-btn"
+            )
+            .click();
+        }
+    }
+);
+
+</script>
+
+</body>
+</html>
